@@ -17,9 +17,9 @@ class Singleton(object):
     :py:class:`Singleton` class decorator implements 
     `singleton pattern <http://en.wikipedia.org/wiki/Singleton_pattern>`_. It 
     uses static methods, so there is not need to be instantiated itself. When a
-    new instance is requested via :py:func:`get_instance` static method, 
+    new instance is requested via :py:meth:`Singleton.get_instance` static method, 
     Singleton creates a key based on given class name and arguments and tries to
-    return an instance matching this key, if a `KeyError` exception occur it
+    return an instance matching this key, if a :py:exc:`KeyError` exception occur it
     will create a new instance and it will add the new instance to a Python
     dictionary.
     
