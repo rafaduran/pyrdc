@@ -61,4 +61,59 @@ class Singleton(object):
     @staticmethod
     def to_key(cls, *args, **kwargs):
         return "{0}{1}{2}".format(cls, args, sorted(kwargs.items()))
+    
+def dict_from_class(cls, filtered=()):
+    """
+    Returns a dictionary containing all attributes for a given class, 
+    filtering unwanted attributes. This method is needed by 
+    :py:func:`property_from_class`.
+    """
+    return dict(
+        (key, value)
+        for (key, value) in cls.__dict__.items()
+        if key not in filtered  and not(key.startswith('__') and \
+                                       key.endswith('__')))
+    
+def property_from_class(cls):
+    """
+    Class decorator used to build a property attribute from a class. 
+    
+    This decorator receipt was taken from 
+    `Jonathan Fine speech at Europython 2011
+    <http://ep2011.europython.eu/conference/talks/objects-and-classes-in-python-and-javascript>`_
+    
+    .. warning:::py:func:`exception_wrapper` uses 
+        :py:func:`dict_from_class`, so it must be used together or imported
+        
+    Usage::
+        
+        class A(object):
+            @property_from_class 
+            class value(object):
+                '''Value must be an integer'''
+                def fget(self):
+                    return self.__value
+                def fset(self, value):
+                    # Ensure that value to be stored is an int.
+                    assert isinstance(value, int), repr(value)
+                self.__value = value
+
+    Now you can do::
+        
+        >>> a = A()
+        >>> a.value = 4
+        >>> print(a.value)
+        4
+        >>> print(A.value.__doc__)
+        Value must be an integer
+        >>> a.value = 'hola'
+        Traceback (most recent call last):
+          File "/home/rdc/workspace/pyrdc/test.py", line 82, in <module>
+            a.value = 'hola'
+          File "/home/rdc/workspace/pyrdc/test.py", line 75, in fset
+            assert isinstance(value, int), repr(value)
+        AssertionError: 'hola'
+        
+    """
+    return property(doc=cls.__doc__, **dict_from_class(cls))
 
