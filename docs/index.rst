@@ -10,6 +10,8 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
+   
+   src/decorators/class
 
 Indices and tables
 ==================
