@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
    
    src/decorators/class
+   src/decorators/method
 
 Indices and tables
 ==================
