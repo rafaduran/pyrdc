@@ -2,11 +2,11 @@
 # -*- Encoding: utf-8 -*-
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 """
-:py:mod:`decorators.method` --- Method decorators
-=================================================
+:py:mod:`~pyrdc.decorators.method` --- Method decorators
+========================================================
 This module contains method decorators.
 
-.. module:: decorators.method 
+.. module:: pyrdc.decorators.method 
     :synopsis: Method decorators
     
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"

@@ -2,11 +2,11 @@
 # -*- Encoding: utf-8 -*-
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 """
-:py:mod:`~decorators.class` --- Class decorators
-================================================
+:py:mod:`~pyrdc.decorators.class` --- Class decorators
+======================================================
 Long description
 
-.. module:: decorators.class
+.. module:: pyrdc.decorators.class
     :synopsis: This module contains class decorators
 
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"
