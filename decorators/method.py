@@ -11,6 +11,7 @@ This module contains method decorators.
     
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"
 """
+from __future__ import print_function
 import functools
 
 def optional_arguments_decorator(real_decorator):
@@ -19,6 +20,9 @@ def optional_arguments_decorator(real_decorator):
     function is converted in a new decorator that can be used with or without 
     arguments. This receipt has been taken from  chapter 2 of 
     Martyn Alchin's "Pro Django" book.
+    
+    Args:
+        real_decorator. Function to be converted into a new decorator
     
     .. note::
         Decorators using this receipt must used extra arguments as keywords 
@@ -102,3 +106,58 @@ class memoized(object):
         def __get__(self, obj, objtype):
             """Support instance methods."""
             return functools.partial(self.__call__, obj)
+
+
+@optional_arguments_decorator
+def error_wrapper(func, args, kwargs, errors=(Exception,), 
+                  msg="Unknown error", error_func=print):
+    """
+    :py:func:`error_wrapper` wrappes any given number of exceptions, if no errors
+    agrument is provided then wrappes :py:exc:`Exception` and applies error_func when 
+    an errors occur(default builtin print function, imported from future).
+    
+    Args:
+        func, args, kwargs: needed by :py:func:`optional_arguments_decorator`
+        errors: errors to be wrapped. Exception tuple, default :py:class:`Exception`
+        msg: A message can be included here
+        error_func: Callable accepting two arguments (Exception raised, message
+            from previous attribute) that will be called if an error occurs.
+        
+    :Authors: Rafael Durán Castañeda <rafadurancastaneda@gmail.com>
+    
+    Usage::
+    
+        @error_wrapper(errors=(TypeError, ValueError, ZeroDivisionError))
+        def test(a, b):
+            return a / b
+        
+    And then you'll get:
+        
+    >>> test(9, 0)
+    integer division or modulo by zero
+    >>> test(5, "string")
+    unsupported operand type(s) for /: 'int' and 'str'
+    
+    This works nice with partial::
+    
+        import functools
+        
+        os_io_error_wrapper = functools.partial(error_wrapper, errors=(IOError, OSError))
+        
+        @os_io_error_wrapper
+        def test():
+            file = open("Doesn't exist", "rb")
+            
+    so:
+    
+        >>> test()
+        [Errno 2] No such file or directory: "Doesn't exist"
+
+    """
+    try:
+        return func(*args, **kwargs)
+    except errors as e:
+        return error_func(e, msg)
+
+
+
