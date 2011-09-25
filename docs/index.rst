@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   src/utils
    src/decorators/class
    src/decorators/method
 

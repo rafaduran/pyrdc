@@ -4,7 +4,7 @@
 """
 :py:mod:`~pyrdc.decorators.class` --- Class decorators
 ======================================================
-Long description
+This module contains class decorators.
 
 .. module:: pyrdc.decorators.class
     :synopsis: This module contains class decorators
