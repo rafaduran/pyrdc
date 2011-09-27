@@ -10,8 +10,11 @@
     
     Args:
         func, args, kwargs: needed by :py:func:`optional_arguments_decorator`
+        
         errors: errors to be wrapped. Exception tuple, default :py:class:`Exception`
+        
         msg: A message can be included here
+        
         error_func: Callable accepting two arguments (Exception raised, message
             from previous attribute) that will be called if an error occurs.
         
