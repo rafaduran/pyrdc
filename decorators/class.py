@@ -67,6 +67,9 @@ def dict_from_class(cls, filtered=()):
     Returns a dictionary containing all attributes for a given class, 
     filtering unwanted attributes. This method is needed by 
     :py:func:`property_from_class`.
+    
+    :authros: Jonathan Fine, 
+        Rafael Durán Castañeda <rafadurancastaneda@gmail.com>
     """
     return dict(
         (key, value)
@@ -82,8 +85,7 @@ def property_from_class(cls):
     `Jonathan Fine speech at Europython 2011
     <http://ep2011.europython.eu/conference/talks/objects-and-classes-in-python-and-javascript>`_
     
-    .. warning:::py:func:`exception_wrapper` uses 
-        :py:func:`dict_from_class`, so it must be used together or imported
+    :authors: Jonathan Fine
         
     Usage::
         
