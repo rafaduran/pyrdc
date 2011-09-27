@@ -112,9 +112,9 @@ class memoized(object):
 def error_wrapper(func, args, kwargs, errors=(Exception,), 
                   msg="Unknown error", error_func=print):
     """
-    :py:func:`error_wrapper` wrappes any given number of exceptions, if no errors
-    agrument is provided then wrappes :py:exc:`Exception` and applies error_func when 
-    an errors occur(default builtin print function, imported from future).
+    :py:func:`error_wrapper` wraps any given number of exceptions, if no errors
+    agrument is provided then wraps :py:exc:`Exception` and applies error_func when 
+    an error occurs(default builtin print function, imported from future).
     
     Args:
         func, args, kwargs: needed by :py:func:`optional_arguments_decorator`
