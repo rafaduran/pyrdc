@@ -1,0 +1,2 @@
+.. automodule :: pyrdc.patterns
+    :members:

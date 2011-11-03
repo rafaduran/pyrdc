@@ -51,3 +51,10 @@ def md5(value):
     hashed.update(str(value))
     return hashed.hexdigest()
 
+
+def to_key(name, *args, **kwargs):
+    """
+    Returns an string formed by the provided name, args and kwargs. This
+    string can be used as a key for caching purposes.
+    """
+    return "{0}{1}{2}".format(name, args, sorted(kwargs.items()))

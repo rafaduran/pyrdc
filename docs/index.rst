@@ -11,9 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   src/patterns
    src/utils
-   src/decorators/class
-   src/decorators/method
+   src/decorators
 
 Indices and tables
 ==================

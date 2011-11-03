@@ -1,8 +1,7 @@
-.. automodule :: pyrdc.decorators.method
-    :members: optional_arguments_decorator, memoized
+.. automodule :: pyrdc.decorators
+    :members:
 
-
-.. py:function:: pyrdc.decorators.method.error_wrapper(func, args, kwargs, errors=(Exception,), msg="Unknown error", error_func=print)
+.. autofunction:: pyrdc.decorators.error_wrapper(func, args, kwargs, errors=(Exception,), msg="Unknown error", error_func=print)
 
     :py:func:`error_wrapper` wraps any given number of exceptions, if no errors
     argument is provided then wraps :py:exc:`Exception` and applies error_func when 
@@ -47,5 +46,3 @@
     
         >>> test()
         [Errno 2] No such file or directory: "Doesn't exist"
-   
-
