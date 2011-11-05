@@ -61,6 +61,29 @@ class Singleton(object):
 
 
 class Borg(object):
+    """
+    :py:class:`Borg` class decorator implements Borg design pattern. Sharing
+    is done by :py:meth:`~pyrdc.patterns.Borg.share` static method, decorating
+    class __init__ method first time a new object is requested. __init__
+    will initialize objects only first once for each parameter set, sharing
+    __dict__ attribute after that.
+
+    Usage::
+
+        @Borg.share
+        class Shared(object):
+            def __init__(self, x):
+                self.x = x
+
+        ham = Shared(3)     # Object is initialized
+        eggs = Shared(3)    # eggs and ham are shared objects
+        ham.x = 2           # This change affects both 
+        spam = Shared(1)    # Spam is not shared, since initialization 
+                            # attributes are different
+        print(id(ham), id(eggs), id(spam))
+        print(id(ham.__dict__), id(eggs.__dict__), id(spam.__dict__))
+        print(ham.x, eggs.x, spam.x)
+    """
     __shared = {}
 
     @staticmethod
@@ -77,7 +100,7 @@ class Borg(object):
                         self.__dict__ = Borg.__shared[key] = {}
                         func(self, *args, **kwargs)
                 return inside_inner
-            # Decorating __init__ method only if it isn't decorated before
+            # Decorating __init__ method only if it isn't decorated
             try:
                 cls.__decorated
             except AttributeError:
