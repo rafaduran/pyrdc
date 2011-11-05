@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- Encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 """
 :py:mod:`~pyrdc.utils` --- Utils mix
@@ -7,7 +7,7 @@
 This module contains a mix of Python methods
 
 .. module:: pyrdc.utils 
-    :synopsis: Short description
+    :synopsis: Some miscellaneous helper functions
     
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"
 """
