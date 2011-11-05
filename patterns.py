@@ -14,7 +14,6 @@ just singleton).
 """
 import utils
 
-
 class Singleton(object):
     """
     :py:class:`Singleton` class decorator implements 
@@ -59,3 +58,30 @@ class Singleton(object):
                 Singleton.__instances[key] = instance
                 return instance
         return inner
+
+
+class Borg(object):
+    __shared = {}
+
+    @staticmethod
+    def share(cls):
+        def outer_inner(*args, **kwargs):
+            def decorate(func):
+                def inside_inner(self, *args, **kwargs):
+                    key = utils.to_key(cls, *args, **kwargs)
+                    try:
+                        # Coping attributes if already initiliazed
+                        self.__dict__ = Borg.__shared[key]
+                    except KeyError:
+                        # Initialization
+                        self.__dict__ = Borg.__shared[key] = {}
+                        func(self, *args, **kwargs)
+                return inside_inner
+            # Decorating __init__ method only if it isn't decorated before
+            try:
+                cls.__decorated
+            except AttributeError:
+                cls.__decorated = True
+                cls.__init__ = decorate(cls.__init__)
+            return cls(*args, **kwargs)
+        return outer_inner
