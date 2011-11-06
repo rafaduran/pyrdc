@@ -3,3 +3,6 @@
 .settings/
 *.pyc
 docs/_build/
+.pyrdc-venv
+pep8.txt
+pylint.txt
