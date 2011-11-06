@@ -8,40 +8,41 @@ This module contains some handy decorators.
 
 .. module:: pyrdc.decorators
     :synopsis: Decorators
-    
+
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"
 """
 from __future__ import print_function
 import functools
 
 import pyrdc.utils as utils
-from pyrdc.exc import wrapper
+from pyrdc.exc import wrapper as wrap
+
 
 def optional_arguments_decorator(real_decorator):
     """
-    :py:func:`optional_arguments_decorator` is a decorator factory, so a 
-    function is converted in a new decorator that can be used with or without 
-    arguments. This receipt has been taken from  chapter 2 of 
+    :py:func:`optional_arguments_decorator` is a decorator factory, so a
+    function is converted in a new decorator that can be used with or without
+    arguments. This receipt has been taken from  chapter 2 of
     Martyn Alchin's "Pro Django" book.
-    
+
     Args:
         real_decorator. Function to be converted into a new decorator
-    
+
     .. note::
-        Decorators using this receipt must used extra arguments as keywords 
+        Decorators using this receipt must used extra arguments as keywords
         arguments
-        
+
     Usage example::
-       
+
         @optional_arguments_decorator
         def decorate(func, args, kwargs, prefix='Decorated'):
             return '{0}: {1}'.format(prefix, func(*args, **kwargs))
-            
+
         @decorate
         def test(a, b):
             return a + b
-            
-    And then:: 
+
+    And then::
 
         >>> print(test(13,4))
         Decorated: 17
@@ -68,17 +69,18 @@ def optional_arguments_decorator(real_decorator):
     return decorator
 
 
-class memoized(object):
+class Memoized(object):
     """
-    :py:class:`memoized` decorator caches a function's return value each time 
-    it is called. If called later with the same arguments, the cached value is 
-    returned, and not re-evaluated. This decorator recipe has been taking from 
-    `Python decorators libray <http://wiki.python.org/moin/PythonDecoratorLibrary>`_
-    and imporved, so it accepts keywords arguments too.
-    
+    :py:class:`Memoized` decorator caches a function's return value each time
+    it is called. If called later with the same arguments, the cached value is
+    returned, and not re-evaluated. This decorator recipe has been taking from
+    `Python decorators libray <http://wiki.python.org/moin/
+    PythonDecoratorLibrary>`_ and imporved, so it accepts keywords arguments
+    too.
+
     Usage::
-    
-        @memoized
+
+        @Memoized
         def fibonacci(n):
            "Return the nth fibonacci number."
            if n in (0, 1):
@@ -86,13 +88,14 @@ class memoized(object):
            return fibonacci(n-1) + fibonacci(n-2)
 
     Then::
-    
+
         >>> print fibonacci(12)
         144
     """
     def __init__(self, func):
         self.func = func
         self.cache = {}
+
     def __call__(self, *args, **kwargs):
         try:
             return self.cache[utils.to_key(self.func, *args, **kwargs)]
@@ -101,24 +104,26 @@ class memoized(object):
                 self.func(*args, **kwargs)
             return value
         except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
+            # uncachable
             # Better to not cache than to blow up entirely.
             return self.func(*args, **kwargs)
+
         def __repr__(self):
             """Return the function's docstring."""
             return self.func.__doc__
-        def __get__(self, obj, objtype):
+
+        def __get__(self, obj, objtype):  # pylint:disable=W0613
             """Support instance methods."""
             return functools.partial(self.__call__, obj)
 
 
 def dict_from_class(cls, filtered=()):
     """
-    Returns a dictionary containing all attributes for a given class, 
-    filtering unwanted attributes. This method is needed by 
+    Returns a dictionary containing all attributes for a given class,
+    filtering unwanted attributes. This method is needed by
     :py:func:`property_from_class`.
-    
-    :authors: Jonathan Fine, 
+
+    :authors: Jonathan Fine,
         Rafael Durán Castañeda <rafadurancastaneda@gmail.com>
     """
     return dict(
@@ -130,18 +135,17 @@ def dict_from_class(cls, filtered=()):
 
 def property_from_class(cls):
     """
-    Class decorator used to build a property attribute from a class. 
-    
-    This decorator receipt was taken from 
-    `Jonathan Fine speech at Europython 2011
-    <http://ep2011.europython.eu/conference/talks/objects-and-classes-in-python-and-javascript>`_
-    
+    Class decorator used to build a property attribute from a class. This 
+    decorator receipt was taken from `Jonathan Fine speech at Europython 2011
+    <http://ep2011.europython.eu/conference/talks/objects-and-classes-in-
+    python-and-javascript>`_
+
     :authors: Jonathan Fine
-        
+
     Usage::
-        
+
         class A(object):
-            @property_from_class 
+            @property_from_class
             class value(object):
                 '''Value must be an integer'''
                 def fget(self):
@@ -152,7 +156,7 @@ def property_from_class(cls):
                 self.__value = value
 
     Now you can do::
-        
+
         >>> a = A()
         >>> a.value = 4
         >>> print(a.value)
@@ -171,4 +175,4 @@ def property_from_class(cls):
     return property(doc=cls.__doc__, **dict_from_class(cls))
 
 
-error_wrapper = optional_arguments_decorator(wrapper)
+error_wrapper = optional_arguments_decorator(wrap)  # pylint:disable=C0103

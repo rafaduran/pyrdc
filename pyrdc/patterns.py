@@ -5,36 +5,37 @@
 :py:mod:`~pyrdc.patterns` --- Patterns
 ======================================
 This module contains Python implementations for some common patterns (actually
-just singleton). 
+just singleton).
 
 .. module:: pyrdc.patterns
     :synopsis: This module contains patterns implementations
 
 .. moduleauthor::"Rafael Durán Castañeda <rafadurancastaneda@gmail.com>"
 """
-import utils
+import pyrdc.utils as utils
+
 
 class Singleton(object):
     """
-    :py:class:`Singleton` class decorator implements 
-    `singleton pattern <http://en.wikipedia.org/wiki/Singleton_pattern>`_. It 
-    use static method decorator :py:meth:`get_instance` and a class variable, 
-    so there is not need to be instantiated itself. When a new instance is 
-    requested via Singleton it creates a key value based on the given class 
-    name and arguments, trying to return an instance matching this key, 
-    if a :py:exc:`KeyError` exception occur it will create a new instance 
+    :py:class:`Singleton` class decorator implements
+    `singleton pattern <http://en.wikipedia.org/wiki/Singleton_pattern>`_. It
+    use static method decorator :py:meth:`get_instance` and a class variable,
+    so there is not need to be instantiated itself. When a new instance is
+    requested via Singleton it creates a key value based on the given class
+    name and arguments, trying to return an instance matching this key,
+    if a :py:exc:`KeyError` exception occur it will create a new instance
     and it will add the new instance to a Python sdictionary.
-    
+
     Usage::
-        
+
         @Singleton.get_instance
         class A(object):
             def __init__(self,*args,**kwargs):
                 print("args:{0}".format([arg for arg in args]))
                 print("kwargs:{0}".format([item for item in kwargs.items()]))
-                
+
     Now you can try it::
-    
+
         >>> spam = A([1,2])
         args:[[1, 2]]
         kwargs:[]
@@ -46,15 +47,15 @@ class Singleton(object):
         139944850546256 139944850546576 139944850546576
     """
     __instances = {}
-    
+
     @staticmethod
-    def get_instance(cls):
+    def get_instance(clss):
         def inner(*args, **kwargs):
-            key = utils.to_key(cls,*args,**kwargs)
+            key = utils.to_key(clss, *args, **kwargs)
             try:
                 return Singleton.__instances[key]
             except KeyError:
-                instance = cls(*args, **kwargs)
+                instance = clss(*args, **kwargs)
                 Singleton.__instances[key] = instance
                 return instance
         return inner
@@ -65,7 +66,7 @@ class Borg(object):
     :py:class:`Borg` class decorator implements Borg design pattern. Sharing
     is done by :py:meth:`~pyrdc.patterns.Borg.share` static method, decorating
     classes first time a new object of that class is requested. __init__ method
-    is decorated when slots aren' used, just sharing __dict__ attribute. 
+    is decorated when slots aren' used, just sharing __dict__ attribute.
     However since this won't work on slots, slots are handled using properties.
 
     Usage::
@@ -77,7 +78,7 @@ class Borg(object):
 
 
     Now you can::
- 
+
         >>> ham = Shared(3)     # Object is initialized
         >>> eggs = Shared(3)    # eggs and ham are shared objects
         >>> ham.x = 2           # This change affects both
@@ -87,7 +88,7 @@ class Borg(object):
         (19432688, 19432688)
         >>> print(ham.x, eggs.x)
         (2, 2)
-    
+
     This works on slots too::
 
         @Borg.share
@@ -97,7 +98,7 @@ class Borg(object):
                 self.x = x
 
     So::
-    
+
         >>> ham = Shared(3)     # Object is initialized
         >>> eggs = Shared(3)    # eggs and ham are shared objects
         >>> print(ham.x, eggs.x)
@@ -108,9 +109,9 @@ class Borg(object):
         >>> spam = Shared(1)    # Now all 3 objects are changed
         print(ham.x, eggs.x, spam.x)
         (1, 1, 1)
-        
+
     .. warning::
-    
+
         Note that each time a new object is requested attributes are shared,
         but __init__ is executed, so if this isn't the desired behavior you
         should modify __init__ method.
@@ -118,11 +119,12 @@ class Borg(object):
     __shared = {}
 
     @staticmethod
-    def share(cls):
+    def share(clss):  # pylint:disable=R0912
         def outer_inner(*args, **kwargs):
             # decorate decorates __init__ method when no __slots__ are found
             def decorate(func):
-                key = utils.to_key(cls)
+                key = utils.to_key(clss)
+
                 def inner(self, *args, **kwargs):
                     try:
                         # Sharing
@@ -134,29 +136,33 @@ class Borg(object):
                         # Initialization
                         func(self, *args, **kwargs)
                 return inner
+
             # class decorator starts here.
             try:
                 # Check if already decorated
-                cls.__decorated
+                clss.decorated
             except AttributeError:
                 # Decorating
-                cls.__decorated = True
-                if not '__slots__' in dir(cls):
+                clss.decorated = True
+                if not '__slots__' in dir(clss):
                     # If no __slots__  decorating __init__
-                    cls.__init__ = decorate(cls.__init__)
+                    clss.__init__ = decorate(clss.__init__)
                 else:
                     # When __slots__ are found setting properties for each
                     # slot
-                    key = utils.to_key(cls)
+                    key = utils.to_key(clss)
                     Borg.__shared[key] = {}
-                    for slot in cls.__slots__:
-                        def setter(self, value):
+                    for slot in clss.__slots__:
+
+                        def setter(self, value):  # pylint:disable=W0613
                             Borg.__shared[key][slot] = value
-                        def getter(self):
+
+                        def getter(self):  # pylint:disable=W0613
                             try:
                                 return Borg.__shared[key][slot]
                             except KeyError:
                                 return None
-                        setattr(cls, slot, property(getter, setter))
-            return cls(*args, **kwargs)
+
+                        setattr(clss, slot, property(getter, setter))
+            return clss(*args, **kwargs)
         return outer_inner
