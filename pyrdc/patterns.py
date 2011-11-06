@@ -64,9 +64,9 @@ class Borg(object):
     """
     :py:class:`Borg` class decorator implements Borg design pattern. Sharing
     is done by :py:meth:`~pyrdc.patterns.Borg.share` static method, decorating
-    class __init__ method first time a new object is requested. __init__
-    will initialize objects only first once for each parameter set, sharing
-    __dict__ attribute after that.
+    classes first time a new object of that class is requested. __init__ method
+    is decorated when slots aren' used, just sharing __dict__ attribute. 
+    However since this won't work on slots, slots are handled using properties.
 
     Usage::
 
@@ -75,36 +75,88 @@ class Borg(object):
             def __init__(self, x):
                 self.x = x
 
-        ham = Shared(3)     # Object is initialized
-        eggs = Shared(3)    # eggs and ham are shared objects
-        ham.x = 2           # This change affects both 
-        spam = Shared(1)    # Spam is not shared, since initialization 
-                            # attributes are different
-        print(id(ham), id(eggs), id(spam))
-        print(id(ham.__dict__), id(eggs.__dict__), id(spam.__dict__))
+
+    Now you can::
+ 
+        >>> ham = Shared(3)     # Object is initialized
+        >>> eggs = Shared(3)    # eggs and ham are shared objects
+        >>> ham.x = 2           # This change affects both
+        >>> print(id(ham), id(eggs))
+        (140294276774800, 140294276775056)
+        >>> print(id(ham.__dict__), id(eggs.__dict__))
+        (19432688, 19432688)
+        >>> print(ham.x, eggs.x)
+        (2, 2)
+    
+    This works on slots too::
+
+        @Borg.share
+        class Shared(object):
+            __slots__ = ('x',)
+            def __init__(self, x):
+                self.x = x
+
+    So::
+    
+        >>> ham = Shared(3)     # Object is initialized
+        >>> eggs = Shared(3)    # eggs and ham are shared objects
+        >>> print(ham.x, eggs.x)
+        (3, 3)
+        >>> ham.x = 2           # This change affects both
+        >>> print(ham.x, eggs.x)
+        (2, 2)
+        >>> spam = Shared(1)    # Now all 3 objects are changed
         print(ham.x, eggs.x, spam.x)
+        (1, 1, 1)
+        
+    .. warning::
+    
+        Note that each time a new object is requested attributes are shared,
+        but __init__ is executed, so if this isn't the desired behavior you
+        should modify __init__ method.
     """
     __shared = {}
 
     @staticmethod
     def share(cls):
         def outer_inner(*args, **kwargs):
+            # decorate decorates __init__ method when no __slots__ are found
             def decorate(func):
-                def inside_inner(self, *args, **kwargs):
-                    key = utils.to_key(cls, *args, **kwargs)
+                key = utils.to_key(cls)
+                def inner(self, *args, **kwargs):
                     try:
-                        # Coping attributes if already initiliazed
+                        # Sharing
                         self.__dict__ = Borg.__shared[key]
                     except KeyError:
-                        # Initialization
+                        # Start sharing
                         self.__dict__ = Borg.__shared[key] = {}
+                    finally:
+                        # Initialization
                         func(self, *args, **kwargs)
-                return inside_inner
-            # Decorating __init__ method only if it isn't decorated
+                return inner
+            # class decorator starts here.
             try:
+                # Check if already decorated
                 cls.__decorated
             except AttributeError:
+                # Decorating
                 cls.__decorated = True
-                cls.__init__ = decorate(cls.__init__)
+                if not '__slots__' in dir(cls):
+                    # If no __slots__  decorating __init__
+                    cls.__init__ = decorate(cls.__init__)
+                else:
+                    # When __slots__ are found setting properties for each
+                    # slot
+                    key = utils.to_key(cls)
+                    Borg.__shared[key] = {}
+                    for slot in cls.__slots__:
+                        def setter(self, value):
+                            Borg.__shared[key][slot] = value
+                        def getter(self):
+                            try:
+                                return Borg.__shared[key][slot]
+                            except KeyError:
+                                return None
+                        setattr(cls, slot, property(getter, setter))
             return cls(*args, **kwargs)
         return outer_inner
