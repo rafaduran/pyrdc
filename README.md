@@ -5,7 +5,7 @@ Internet or I've written myself:
 
 * If you like it fork me!
 
-* If you send a pull request!
+* If you improve it send a pull request!
 
 # Install
 You need setuptools in order to install it:
